@@ -26,7 +26,7 @@ def protected_view(f):
 
         try: 
             token_payload = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user = User.query.filter_by(id = token_payload['id']).first()
+            user = Account.query.filter_by(id = token_payload['id']).first()
         except:
             return jsonify({'success': False, 'message' : 'Something went wrong trying to authenticate you. Please try again.'})
 
@@ -62,7 +62,7 @@ def get_login_token(username, password):
     # Return a token if the user exists and 
     # the password matches the user's password 
 
-    user = User.query.filter_by(username = username).first()
+    user = Account.query.filter_by(username = username).first()
 
     if not user:
         return None
@@ -85,12 +85,12 @@ def logout():
 
 @auth.route("/do-register", methods=["POST"])
 def do_register():
-    email_exists = db.session.query(User.email).filter_by(email=request.form["email"]).scalar() is not None
+    email_exists = db.session.query(Account.email).filter_by(email=request.form["email"]).scalar() is not None
 
     if email_exists:
         return jsonify({"success": False, "reason": "Email already bound to a user."})
 
-    user = User(\
+    user = Account(\
         first_name=request.form["first-name"],\
         last_name=request.form["last-name"],\
         username=request.form["username"],\
