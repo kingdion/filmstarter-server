@@ -103,4 +103,4 @@ def do_register():
     db.session.add(user)
     db.session.commit()
 
-    return login(request.form["email"], request.form["password"])
+    return login(request.form["username"], request.form["password"])
