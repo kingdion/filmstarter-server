@@ -8,6 +8,7 @@ class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4, unique=True, nullable=False)
+    username = db.Column(db.String(25), nullable=False, unique=True)
     first_name = db.Column(db.String(25), nullable=False)
     last_name = db.Column(db.String(25), nullable=False)
     email = db.Column(db.String(256), nullable=False)
@@ -18,6 +19,3 @@ class User(db.Model):
         self.last_name = last_name
         self.email = email
         self.password = password
-
-    def __repr__(self):
-        return f'User: {self.first_name} {self.last_name}'

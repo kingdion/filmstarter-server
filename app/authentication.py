@@ -12,7 +12,7 @@ auth = Blueprint("auth", __name__)
 
 '''
 Decorator to protect a view, wraps around a view function
-and checks the request header for x-access-token, if one is
+and checks the request header for a session token, if one is
 given and is valid, the view will be returned and the view function
 will have access to a logged in user.
 '''
