@@ -24,7 +24,9 @@ def create_app(debugMode = True):
     db.init_app(app)
 
     from .authentication import auth
+    from .api import api
 
     app.register_blueprint(auth)
+    app.register_blueprint(api)
 
     return app

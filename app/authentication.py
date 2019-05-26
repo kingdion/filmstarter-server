@@ -85,22 +85,33 @@ def logout():
 
 @auth.route("/do-register", methods=["POST"])
 def do_register():
-    email_exists = db.session.query(Account.email).filter_by(email=request.form["email"]).scalar() is not None
+    first_name = request.form["first-name"]
+    last_name = request.form["last-name"]
+    username = request.form["username"]
+    email = request.form["email"]
+    password = request.form["password"]
 
-    if email_exists:
+    if db.session.query(Account.email).filter_by(email=email).scalar() is not None:
         return jsonify({"success": False, "reason": "Email already bound to a user."})
+    elif len(username) > 25:
+        return jsonify({"success": False, "reason": "Username too long."})
+    elif len(first_name) > 25:
+        return jsonify({"success": False, "reason": "First Name too long."})
+    elif len(last_name) > 25:
+        return jsonify({"success": False, "reason": "Last Name too long."})
+    elif len(email) > 256 or ("@" not in email):
+        return jsonify({"success": False, "reason": "Invalid email."})
+
 
     user = Account(\
-        first_name=request.form["first-name"],\
-        last_name=request.form["last-name"],\
-        username=request.form["username"],\
-        email=request.form["email"],\
-        password=generate_password_hash(request.form["password"], method='sha256'),\
+        first_name=first_name,\
+        last_name=last_name,\
+        username=username,\
+        email=email,\
+        password=generate_password_hash(password, method='sha256'),\
     )
-
-    # TODO: Add server-side validation (since clients can just alter the javascript to bypass client-side validation)
 
     db.session.add(user)
     db.session.commit()
 
-    return login(request.form["username"], request.form["password"])
+    return login(username, password)
