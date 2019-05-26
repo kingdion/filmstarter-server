@@ -38,7 +38,7 @@ def do_login():
     # Get data from the form input, check if they are valid 
     # and send login data to the login function
 
-    username = request.form.get("email")
+    username = request.form.get("username")
     password = request.form.get("password")
 
     return login(username, password)
