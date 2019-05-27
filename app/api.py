@@ -14,4 +14,4 @@ api = Blueprint("api", __name__)
 @api.route("/get-user")
 @token_auth.login_required
 def get_user():
-    return jsonify(g.current_user.as_dict())
+    return jsonify({"success": True, "user": g.current_user.as_dict()})
