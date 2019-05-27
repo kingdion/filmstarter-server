@@ -23,6 +23,10 @@ def verify_token(token):
         return False
     return False
 
+@token_auth.error_handler
+def error_handler():
+    return jsonify({"success": False, "message": "Authorization failed."})
+
 @auth.route("/do-login", methods=["POST"])
 def do_login():
     # Get data from the form input, check if they are valid 
