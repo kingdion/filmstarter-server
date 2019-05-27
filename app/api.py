@@ -18,5 +18,5 @@ def get_user():
 
 @api.route("/valid-token")
 @token_auth.login_required
-def get_user():
+def get_token():
     return jsonify({"success": True})
