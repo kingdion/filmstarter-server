@@ -2,36 +2,26 @@ import uuid
 import jwt
 import datetime
 from flask import Flask, request, session, jsonify, make_response, Blueprint, \
-                render_template, flash, redirect, url_for, request, jsonify, current_app
+                render_template, flash, redirect, url_for, request, jsonify, current_app, g
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from .models import *
+from flask_httpauth import HTTPTokenAuth
 
 auth = Blueprint("auth", __name__)
+token_auth = HTTPTokenAuth()
 
-'''
-Decorator to protect a view, wraps around a view function
-and checks the request header for a session token, if one is
-given and is valid, the view will be returned and the view function
-will have access to a logged in user.
-'''
-def protected_view(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = session.get("token")
-
-        if token == None:
-            return jsonify({'success': False, 'message' : 'User is not authenticated. Please log in.'})
-
-        try: 
-            token_payload = jwt.decode(token, current_app.config['SECRET_KEY'])
-            user = Account.query.filter_by(id = token_payload['id']).first()
-        except:
-            return jsonify({'success': False, 'message' : 'Something went wrong trying to authenticate you. Please try again.'})
-
-        return f(user, *args, **kwargs)
-    return decorated
+@token_auth.verify_token
+def verify_token(token):
+    try:
+        token_payload = jwt.decode(token, current_app.config['SECRET_KEY'])
+        user = Account.query.filter_by(id = token_payload['id']).first()
+        g.current_user = user if token else None
+        return g.current_user is not None
+    except:
+        return False
+    return False
 
 @auth.route("/do-login", methods=["POST"])
 def do_login():

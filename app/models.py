@@ -20,3 +20,11 @@ class Account(db.Model):
         self.username = username
         self.email = email
         self.password = password
+
+    def as_dict(self):
+        return {
+            "first_name" : self.first_name,
+            "last_name" : self.last_name,
+            "email" : self.email,
+            "username" : self.username,
+        }
