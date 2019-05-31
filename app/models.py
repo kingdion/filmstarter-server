@@ -14,6 +14,11 @@ class Account(db.Model):
     email = db.Column(db.String(256), nullable=False)
     password = db.Column(db.String(256), nullable=False)
 
+    projects = db.relationship(
+        "Project",
+        secondary="project_link",
+        back_populates="accounts")
+
     def __init__(self, first_name, last_name, username, email, password):
         self.first_name = first_name
         self.last_name = last_name
@@ -22,9 +27,53 @@ class Account(db.Model):
         self.password = password
 
     def as_dict(self):
-        return {
+        return 
+        {
             "first_name" : self.first_name,
             "last_name" : self.last_name,
             "email" : self.email,
             "username" : self.username,
         }
+
+class Project(db.Model):
+    __tablename__ = 'project'
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4, unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    production_team = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(50), nullable=False)
+    team_code = db.Column(db.String(6), nullable=False)
+
+    accounts = db.relationship(
+        "Account",
+        secondary="project_link",
+        back_populates="projects")
+
+    def __init__(self, name, production_team, description, team_code):
+        self.name = name
+        self.production_team = production_team
+        self.description = description
+        self.team_code = team_code
+
+    def as_dict(self):
+        return 
+        {
+            "name" : self.name,
+            "production_team" : self.production_team,
+            "description" : self.description,
+            "team_code" : self.team_code,
+        }
+
+class ProjectLink(db.Model):
+    __tablename__ = 'project_link'
+
+    accountId = db.Column(UUID(as_uuid=True), db.ForeignKey("account.id"), primary_key=True, default=uuid4, unique=True, nullable=False)
+    projectId = db.Column(UUID(as_uuid=True), db.ForeignKey("project.id"), primary_key=True, default=uuid4, unique=True, nullable=False)
+    role = db.Column(db.String(50), nullable=False)
+    is_active = db.Column(db.Boolean(), default=False, nullable=False)
+
+    def __init__(self, accountId, projectId, role, is_active):
+        self.accountId = accountId
+        self.projectId = projectId
+        self.role = role
+        self.is_active = is_active

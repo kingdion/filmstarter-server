@@ -79,11 +79,14 @@ def logout():
 
 @auth.route("/do-register", methods=["POST"])
 def do_register():
-    first_name = request.form["first-name"]
-    last_name = request.form["last-name"]
-    username = request.form["username"]
-    email = request.form["email"]
-    password = request.form["password"]
+    try:
+        first_name = request.form["first_name"]
+        last_name = request.form["last_name"]
+        username = request.form["username"]
+        email = request.form["email"]
+        password = request.form["password"]
+    except:
+        return jsonify({'success': False, 'message' : 'Invalid register request data'})
 
     if db.session.query(Account.email).filter_by(email=email).scalar() is not None:
         return jsonify({"success": False, "reason": "Email already bound to a user."})
