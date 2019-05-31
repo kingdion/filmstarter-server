@@ -27,13 +27,7 @@ class Account(db.Model):
         self.password = password
 
     def as_dict(self):
-        return 
-        {
-            "first_name" : self.first_name,
-            "last_name" : self.last_name,
-            "email" : self.email,
-            "username" : self.username,
-        }
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns} 
 
 class Project(db.Model):
     __tablename__ = 'project'
@@ -56,19 +50,13 @@ class Project(db.Model):
         self.team_code = team_code
 
     def as_dict(self):
-        return 
-        {
-            "name" : self.name,
-            "production_team" : self.production_team,
-            "description" : self.description,
-            "team_code" : self.team_code,
-        }
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns} 
 
 class ProjectLink(db.Model):
     __tablename__ = 'project_link'
 
-    accountId = db.Column(UUID(as_uuid=True), db.ForeignKey("account.id"), primary_key=True, default=uuid4, unique=True, nullable=False)
-    projectId = db.Column(UUID(as_uuid=True), db.ForeignKey("project.id"), primary_key=True, default=uuid4, unique=True, nullable=False)
+    accountId = db.Column(UUID(as_uuid=True), db.ForeignKey("account.id"), primary_key=True, default=uuid4, nullable=False)
+    projectId = db.Column(UUID(as_uuid=True), db.ForeignKey("project.id"), primary_key=True, default=uuid4, nullable=False)
     role = db.Column(db.String(50), nullable=False)
     is_active = db.Column(db.Boolean(), default=False, nullable=False)
 

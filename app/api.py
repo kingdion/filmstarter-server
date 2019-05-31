@@ -2,6 +2,7 @@ import uuid
 import jwt
 import datetime
 import string
+import json
 import random
 from enum import Enum
 from flask import Flask, request, session, jsonify, make_response, Blueprint, \
@@ -44,18 +45,66 @@ def create_new_project():
     db.session.add(link)
     db.session.commit()
 
-    setActive(proj.id, True)
+    setActive(proj.id)
 
     return jsonify({"success": True})
 
-def setActive(projectid, boolean_value):
-    db.session.query(ProjectLink).\
-       filter(ProjectLink.projectId != projectid).\
-       update({"is_active": False })
+@api.route("/projects/get", methods=["GET"])
+@token_auth.login_required
+def get_all_projects():
+    query = db.session.query(Project).filter(ProjectLink.accountId == g.current_user.id).all()
+    proj = [project.as_dict() for project in query]
+    return jsonify({"success": True,  "projects": proj})
 
-    db.session.query(ProjectLink).\
-       filter(ProjectLink.projectId == projectid).\
-       update({"is_active": True })
+@api.route("/projects/select", methods=["POST"])
+@token_auth.login_required
+def select_project():
+    project_id = request.form.get("project_id")
+    
+    if not project_id:
+        return jsonify({"success": False, "message": "Invalid request data"})
+
+    setActive(project_id)
+
+    return jsonify({"success": True})
+
+@api.route("/projects/add", methods=["POST"])
+@token_auth.login_required
+def add_to_project():
+    project_id = uuid.UUID(request.form.get("project_id"))
+    user_id = uuid.UUID(request.form.get("user_id"))
+    role = request.form.get("role")
+
+    if not project_id or not user_id:
+        return jsonify({"success": False, "message": "Invalid request data"})
+
+    project = db.session.query(Project).filter(ProjectLink.projectId == project_id).first()
+
+    if not project:
+        return jsonify({"success": False, "message": "This project doesn't exist"}) 
+
+    exists = db.session.query(Project).filter((ProjectLink.projectId == project_id) & (ProjectLink.accountId == user_id)).first()
+    if exists:
+        return jsonify({"success": False, "message": "This project link already exist"}) 
+
+    link = ProjectLink(user_id, project.id, role, False)
+    db.session.add(link)
+    db.session.commit()
+    
+    return jsonify({"success": True})
+
+def setActive(projectid):
+    try:
+        db.session.query(ProjectLink).\
+            filter((ProjectLink.projectId != projectid) & (ProjectLink.accountId == g.current_user.id)).\
+            update({"is_active": False })
+
+        db.session.query(ProjectLink).\
+            filter((ProjectLink.projectId == projectid) & (ProjectLink.accountId == g.current_user.id)).\
+            update({"is_active": True })
+    except:
+       return jsonify({"success": False, "message": "Something went wrong..."}) 
+
     db.session.commit()
 
 
