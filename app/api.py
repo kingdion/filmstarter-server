@@ -53,8 +53,20 @@ def create_new_project():
 @token_auth.login_required
 def get_all_projects():
     query = db.session.query(Project).filter(ProjectLink.accountId == g.current_user.id).all()
+
     proj = [project.as_dict() for project in query]
-    return jsonify({"success": True,  "projects": proj})
+    applicable_projects = []
+
+    for project in proj:
+        link = db.session.query(ProjectLink).filter((ProjectLink.accountId == g.current_user.id) & (ProjectLink.projectId == project["id"])).first()
+
+        if link:
+            project["is_active"] = link.is_active
+            project["role"] = link.role
+
+            applicable_projects.append(project)
+
+    return jsonify({"success": True,  "projects": applicable_projects})
 
 @api.route("/projects/select", methods=["POST"])
 @token_auth.login_required
