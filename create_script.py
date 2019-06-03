@@ -37,7 +37,9 @@ with app.app_context():
         project_link4 = ProjectLink(user4.id, project1.id, "Cinematographer", True)
 
         project_link5 = ProjectLink(user1.id, project2.id, "Writer", False)
-        project_link6 = ProjectLink(user2.id, project2.id, "Director", True)
+        project_link6 = ProjectLink(user2.id, project2.id, "Director", False)
+        project_link7 = ProjectLink(user1.id, project3.id, "Cinematographer", False)
+        project_link8 = ProjectLink(user1.id, project4.id, "Director", False)
 
         db.session.add(project_link)
         db.session.add(project_link2)
@@ -45,5 +47,7 @@ with app.app_context():
         db.session.add(project_link4)
         db.session.add(project_link5)
         db.session.add(project_link6)
+        db.session.add(project_link7)
+        db.session.add(project_link8)
 
         db.session.commit()

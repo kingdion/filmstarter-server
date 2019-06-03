@@ -86,6 +86,29 @@ def get_current_project():
             applicable_projects.append(project)
 
     return jsonify({"success": True,  "projects": applicable_projects})
+    
+
+@api.route("/projects/team/users", methods=["GET"])
+@token_auth.login_required
+def get_team_users():
+    query = db.session.query(Project).filter(ProjectLink.accountId == g.current_user.id).all()
+
+    proj = [project.as_dict() for project in query]
+    applicable_projects = []
+
+    for project in proj:
+        link = db.session.query(ProjectLink).filter((ProjectLink.accountId == g.current_user.id) & (ProjectLink.projectId == project["id"])).first()
+
+        if link and link.is_active == True:
+            project["is_active"] = link.is_active
+            project["role"] = link.role
+
+            applicable_projects.append(project)
+
+    users_query = db.session.query(ProjectLink).filter((ProjectLink.projectId == applicable_projects[0]["id"])).all()
+    users = [linky.as_dict() for linky in users_query]
+
+    return jsonify({"success": True,  "users": users})
 
 @api.route("/projects/select", methods=["POST"])
 @token_auth.login_required

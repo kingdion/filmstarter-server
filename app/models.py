@@ -65,3 +65,6 @@ class ProjectLink(db.Model):
         self.projectId = projectId
         self.role = role
         self.is_active = is_active
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
